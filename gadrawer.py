@@ -1,15 +1,18 @@
 import sys
 import random
-import scipy
 import time
 from PIL import Image, ImageDraw, ImageChops
 
 POPULATION_SIZE = 50
 SELECTION_CUTOFF = 0.1
-GENOME_LENGTH = 100
-MUTATION_RATE = 0.02 # mutation rate of each gene as percentage
-MUTATION_AMOUNT = 0.1
-GOAL = Image.open('smonalisa.png').convert('RGB')
+GENOME_LENGTH = 50
+MUTATION_RATE = 0.02
+if (len(sys.argv) != 2):
+	print 'Usage: python gadrawer.py [file_name]'
+	sys.exit()
+GOAL = Image.open(sys.argv[1]).convert('RGB')
+WIDTH = GOAL.size[0]
+HEIGHT = GOAL.size[1]
 
 # Poplation class: a population consists of multiple individuals
 class Population:
@@ -50,6 +53,7 @@ class Individual:
 		if mother is None or father is None:
 			# create a new individual with random genome
 			for i in xrange(GENOME_LENGTH):
+				# start with invisible ones
 				self.add_gene(Gene(invisible = True))
 
 		else:
@@ -101,14 +105,7 @@ class Individual:
 # Gene class: each gene determines the RGBA and the vertices of a triangle
 class Gene:
 
-	width = GOAL.size[0]
-	height = GOAL.size[1]
-	delta_position = GOAL.size[0] * MUTATION_AMOUNT
-	delta_rgb = int(255 * MUTATION_AMOUNT)
-	delta_a = int(50 * MUTATION_AMOUNT)
-
 	def __init__(self, invisible = False):
-		# TODO: randomize initial values
 		self.randomizeR()
 		self.randomizeG()
 		self.randomizeB()
@@ -116,20 +113,11 @@ class Gene:
 		if invisible:
 			self.A = 0
 		else:
-			self.randomizeA()
+			self.A = 50
 
 		self.randomizeV1()
 		self.randomizeV2()
 		self.randomizeV3()
-
-	def mutate(self):
-		self.mutateR()
-		self.mutateG()
-		self.mutateB()
-		self.mutateA()
-		self.mutateV1()
-		self.mutateV2()
-		self.mutateV3()
 
 	def randomizeR(self):
 		self.R = random.randint(0, 255)
@@ -144,60 +132,20 @@ class Gene:
 		self.A = random.randint(0, 50)
 
 	def randomizeV1(self):
-		self.V1 = random.uniform(-10, self.width + 10), random.uniform(-10, self.height + 10)
+		self.V1 = random.uniform(-10, WIDTH + 10), random.uniform(-10, HEIGHT + 10)
 
 	def randomizeV2(self):
-		self.V2 = random.uniform(-10, self.width + 10), random.uniform(-10, self.height + 10)
+		self.V2 = random.uniform(-10, WIDTH + 10), random.uniform(-10, HEIGHT + 10)
 
 	def randomizeV3(self):
-		self.V3 = random.uniform(-10, self.width + 10), random.uniform(-10, self.height + 10)
+		self.V3 = random.uniform(-10, WIDTH + 10), random.uniform(-10, HEIGHT + 10)
 
-	def mutateR(self):
-		self.R += random.randint(-self.delta_rgb, self.delta_rgb)
-		if self.R > 255:
-			self.R = 255
-		elif self.R < 0:
-			self.R = 0
-
-	def mutateG(self):
-		self.G += random.randint(-self.delta_rgb, self.delta_rgb)
-		if self.G > 255:
-			self.G = 255
-		elif self.G < 0:
-			self.G = 0
-
-	def mutateB(self):
-		self.B += random.randint(-self.delta_rgb, self.delta_rgb)
-		if self.B > 255:
-			self.B = 255
-		elif self.B < 0:
-			self.B = 0
-
-	def mutateA(self):
-		self.A += random.randint(-self.delta_a, self.delta_a)
-		if self.A > 60:
-			self.A = 60
-		elif self.A < 10:
-			self.A = 10
-
-	def mutateV1(self):
-		V1_x = min(max(self.V1[0] + random.uniform(-self.delta_position, self.delta_position), -50), self.width + 50)
-		V1_y = min(max(self.V1[1] + random.uniform(-self.delta_position, self.delta_position), -50), self.height + 50)
-		self.V1 = V1_x, V1_y
-
-	def mutateV2(self):
-		V2_x = min(max(self.V2[0] + random.uniform(-self.delta_position, self.delta_position), -50), self.width + 50)
-		V2_y = min(max(self.V2[1] + random.uniform(-self.delta_position, self.delta_position), -50), self.height + 50)
-		self.V2 = V2_x, V2_y
-
-	def mutateV3(self):
-		V3_x = min(max(self.V3[0] + random.uniform(-self.delta_position, self.delta_position), -50), self.width + 50)
-		V3_y = min(max(self.V3[1] + random.uniform(-self.delta_position, self.delta_position), -50), self.height + 50)
-		self.V3 = V3_x, V3_y
 
 
 def main():
+	# start timer
 	start = time.time()
+
 	p = Population()
 	
 	for i in xrange(20000):
@@ -207,9 +155,9 @@ def main():
 		print '- Current fitness =', g.fitness
 		print '- Current weakest =', p.get_weakest().fitness
 		if (i + 1) % 500 == 0:
-			g.get_image().save('./outputs/smonalisa-l100-g' + str(i + 1) + '-f' + str(g.fitness) + '.png')
+			g.get_image().save('./outputs/output-l100-g' + str(i + 1) + '-f' + str(g.fitness) + '.png')
 
-
+	# end timer
 	end = time.time()
 	print 'Time elapsed: ', end - start
 
