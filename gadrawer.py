@@ -5,8 +5,9 @@ from PIL import Image, ImageDraw, ImageChops
 
 POPULATION_SIZE = 50
 SELECTION_CUTOFF = 0.1
-GENOME_LENGTH = 50
+GENOME_LENGTH = 100
 MUTATION_RATE = 0.02
+
 if (len(sys.argv) != 2):
 	print 'Usage: python gadrawer.py [file_name]'
 	sys.exit()
@@ -154,8 +155,8 @@ def main():
 		g = p.get_fittest()
 		print '- Current fitness =', g.fitness
 		print '- Current weakest =', p.get_weakest().fitness
-		if (i + 1) % 500 == 0:
-			g.get_image().save('./outputs/output-l100-g' + str(i + 1) + '-f' + str(g.fitness) + '.png')
+		if (i + 1) % 100 == 0:
+			g.get_image().save('./outputs/output-l' + str(GENOME_LENGTH) + '-g' + str(i + 1) + '-f' + str(g.fitness) + '.png')
 
 	# end timer
 	end = time.time()
